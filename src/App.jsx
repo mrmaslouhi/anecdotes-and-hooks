@@ -1,14 +1,20 @@
 import { useState } from 'react'
+import {
+  Routes,
+  Route,
+  Link,
+  useMatch
+} from 'react-router-dom'
 
-const Menu = () => {
+const Menu = ({ anecdotes }) => {
   const padding = {
     paddingRight: 5
   }
   return (
     <div>
-      <a href='#' style={padding}>anecdotes</a>
-      <a href='#' style={padding}>create new</a>
-      <a href='#' style={padding}>about</a>
+      <Link to="/" style={padding}>Anecdotes</Link>
+      <Link to="/post" style={padding}>Post new</Link>
+      <Link to="/about" style={padding}>About</Link>
     </div>
   )
 }
@@ -17,21 +23,23 @@ const AnecdoteList = ({ anecdotes }) => (
   <div>
     <h2>Anecdotes</h2>
     <ul>
-      {anecdotes.map(anecdote => <li key={anecdote.id} >{anecdote.content}</li>)}
+      {anecdotes.map(anecdote => <li key={anecdote.id} ><Link to={`/anecdote/${anecdote.id}`}>{anecdote.content}</Link></li>)}
     </ul>
   </div>
 )
 
+const SingleAnecdote = ({ anecdote }) => {
+  return (
+    <div>
+      <h2>{anecdote.content} by {anecdote.author}</h2>
+      <p>has {anecdote.votes} votes</p>
+      <span>for more info see <a href={anecdote.info}>{anecdote.info}</a></span>
+    </div>
+  )
+}
+
 const About = () => (
   <div>
-    <h2>About anecdote app</h2>
-    <p>According to Wikipedia:</p>
-
-    <em>An anecdote is a brief, revealing account of an individual person or an incident.
-      Occasionally humorous, anecdotes differ from jokes because their primary purpose is not simply to provoke laughter but to reveal a truth more general than the brief tale itself,
-      such as to characterize a person by delineating a specific quirk or trait, to communicate an abstract idea about a person, place, or thing through the concrete details of a short narrative.
-      An anecdote is "a story with a point."</em>
-
     <p>Software engineering is full of excellent anecdotes, at this app you can find the best and add more.</p>
   </div>
 )
@@ -44,7 +52,7 @@ const Footer = () => (
   </div>
 )
 
-const CreateNew = (props) => {
+const PostNew = (props) => {
   const [content, setContent] = useState('')
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
@@ -62,7 +70,7 @@ const CreateNew = (props) => {
 
   return (
     <div>
-      <h2>create a new anecdote</h2>
+      <h2>post a new anecdote</h2>
       <form onSubmit={handleSubmit}>
         <div>
           content
@@ -76,7 +84,7 @@ const CreateNew = (props) => {
           url for more info
           <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
         </div>
-        <button>create</button>
+        <button>post</button>
       </form>
     </div>
   )
@@ -122,13 +130,21 @@ const App = () => {
     setAnecdotes(anecdotes.map(a => a.id === id ? voted : a))
   }
 
+  const match = useMatch('/anecdotes/:id')
+  const anecdote = match ? anecdoteById(Number(match.params.id)) : null
+  console.log(typeof anecdote)
+  console.log(anecdote)
   return (
     <div>
       <h1>Software anecdotes</h1>
-      <Menu />
-      <AnecdoteList anecdotes={anecdotes} />
-      <About />
-      <CreateNew addNew={addNew} />
+      <Menu anecdotes={anecdotes} />
+      <Routes>
+        <Route path='/anecdotes/:id' element={<SingleAnecdote anecdote={anecdote} /> } />
+        <Route path='/' element={<AnecdoteList anecdotes={anecdotes} />} />
+        <Route path='/post' element={<PostNew addNew={addNew} />} />
+        <Route path='/about' element={<About />} />
+      </Routes>
+      <br />
       <Footer />
     </div>
   )
