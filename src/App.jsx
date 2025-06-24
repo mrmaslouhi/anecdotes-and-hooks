@@ -3,7 +3,8 @@ import {
   Routes,
   Route,
   Link,
-  useMatch
+  useMatch,
+  useNavigate
 } from 'react-router-dom'
 
 const Menu = ({ anecdotes }) => {
@@ -52,7 +53,8 @@ const Footer = () => (
   </div>
 )
 
-const PostNew = (props) => {
+const PostNew = ({ addNew, setNotification }) => {
+  const navigate = useNavigate()
   const [content, setContent] = useState('')
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
@@ -60,12 +62,18 @@ const PostNew = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    props.addNew({
+    addNew({
       content,
       author,
       info,
       votes: 0
     })
+
+    navigate('/')
+    setNotification(`Added ${content}`)
+    setTimeout(() => {
+      setNotification(null)
+    }, 5000)
   }
 
   return (
@@ -130,18 +138,19 @@ const App = () => {
     setAnecdotes(anecdotes.map(a => a.id === id ? voted : a))
   }
 
+  console.log('Al anecdotat:', anecdotes)
+  console.log('Al ish3ar', notification)
   const match = useMatch('/anecdotes/:id')
   const anecdote = match ? anecdoteById(Number(match.params.id)) : null
-  console.log(typeof anecdote)
-  console.log(anecdote)
   return (
     <div>
       <h1>Software anecdotes</h1>
       <Menu anecdotes={anecdotes} />
+      {notification}
       <Routes>
         <Route path='/anecdotes/:id' element={<SingleAnecdote anecdote={anecdote} /> } />
         <Route path='/' element={<AnecdoteList anecdotes={anecdotes} />} />
-        <Route path='/post' element={<PostNew addNew={addNew} />} />
+        <Route path='/post' element={<PostNew setNotification={setNotification} addNew={addNew} />} />
         <Route path='/about' element={<About />} />
       </Routes>
       <br />
