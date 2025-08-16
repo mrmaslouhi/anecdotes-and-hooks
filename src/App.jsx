@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { Routes, Route, Link, useMatch } from "react-router-dom";
 import { useField } from "./hooks/index";
 
-console.log(useField);
-
 const Menu = () => {
   const padding = {
     paddingRight: 5,
@@ -95,9 +93,9 @@ const Footer = () => (
 );
 
 const PostNew = (props) => {
-  const content = useField("content");
-  const author = useField("author");
-  const info = useField("info");
+  const { clearInput: contentReset, ...content } = useField("content");
+  const { clearInput: authorReset, ...author } = useField("author");
+  const { clearInput: infoReset, ...info } = useField("info");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -112,6 +110,12 @@ const PostNew = (props) => {
     setTimeout(() => {
       setNotification(null);
     }, 5000);
+  };
+
+  const clearInputs = () => {
+    contentReset();
+    authorReset();
+    infoReset();
   };
 
   return (
@@ -131,6 +135,9 @@ const PostNew = (props) => {
           <input {...info} />
         </div>
         <button>create</button>
+        <button type="button" onClick={clearInputs}>
+          reset
+        </button>
       </form>
     </div>
   );
